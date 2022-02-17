@@ -1,14 +1,12 @@
 import Head from "next/head";
 import Image from "next/image";
 import { useState } from "react";
-import IngredientsInput from "../components/IngredientsInput";
-import IngredientsList from "../components/IngredientsList";
+import Ingredients from "../components/Ingredients";
+import Recipes from "../components/Recipes";
 import styles from "../styles/Home.module.css";
-import { v4 } from "uuid";
 
 export default function Home() {
-  const [ingredients, setIngredients] = useState([]);
-
+  const [recipes, setRecipes] = useState([]);
   return (
     <div className={styles.container}>
       <Head>
@@ -24,21 +22,21 @@ export default function Home() {
           Get started by adding ingredients below.
         </p>
 
-        <IngredientsInput
-          onSubmit={(ingredient) => {
-            setIngredients([...ingredients, { id: v4(), value: ingredient }]);
+        <Ingredients
+          onUpdate={async (ingredients) => {
+            const queryString = ingredients
+              .map((i) => i.value.trim())
+              .join(",");
+            const res = await fetch(`/api/recipes?q=${queryString}`);
+            const { data } = await res.json();
+            setRecipes(data);
           }}
         />
-
-        <div className={styles.grid}>
-          <IngredientsList
-            onRemove={(ingredientId) => {
-              setIngredients(ingredients.filter((i) => i.id !== ingredientId));
-            }}
-            ingredients={ingredients}
-          />
-        </div>
       </main>
+
+      <section>
+        <Recipes recipes={recipes} />
+      </section>
 
       <footer className={styles.footer}>
         <a
